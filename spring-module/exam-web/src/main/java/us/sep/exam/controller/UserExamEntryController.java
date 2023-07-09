@@ -38,6 +38,14 @@ public class UserExamEntryController {
         return new Result<>(true, CommonResultCode.SUCCESS.getCode(), CommonResultCode.SUCCESS.getMessage(),userExamEntryService.getUserEntryByExamEntryId(examEntryId));
     }
 
+    @GetMapping("/cache")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_MANAGER','ROLE_ADMIN')")
+    @Log(loggerName = LoggerName.WEB_DIGEST)
+    public Result<List<UserExamEntryBO>> getUserEntryByCache(String examEntryId, HttpServletRequest httpServletRequest){
+        AssertUtil.assertStringNotBlank(examEntryId,"考试报名信息id不能为空");
+        return new Result<>(true, CommonResultCode.SUCCESS.getCode(), CommonResultCode.SUCCESS.getMessage(),userExamEntryService.getUserEntryByCache(examEntryId));
+    }
+
     @GetMapping("/user")
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_MANAGER','ROLE_ADMIN')")
     @Log(loggerName = LoggerName.WEB_DIGEST)
@@ -55,7 +63,7 @@ public class UserExamEntryController {
     }
 
     @GetMapping("/recordByExam")
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_MANAGER','ROLE_ADMIN')")
     @Log(loggerName = LoggerName.WEB_DIGEST)
     public Result<List<UserExamEntryRecordBO>> getUserEntryRecordByExamEntry(String examEntryId, HttpServletRequest httpServletRequest){
         AssertUtil.assertStringNotBlank(examEntryId,"报名信息id不能为空");
@@ -64,7 +72,7 @@ public class UserExamEntryController {
 
 
     @GetMapping("/recordByUser")
-    @PreAuthorize("hasAnyRole('ROLE_MANAGER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_MANAGER','ROLE_ADMIN')")
     @Log(loggerName = LoggerName.WEB_DIGEST)
     public Result<List<UserExamEntryRecordBO>> getUserEntryRecordByUserId(String userId, HttpServletRequest httpServletRequest){
         AssertUtil.assertStringNotBlank(userId,"用户id不能为空");

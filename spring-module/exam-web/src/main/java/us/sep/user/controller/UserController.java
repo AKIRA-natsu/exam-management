@@ -7,15 +7,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import us.sep.biz.log.request.LogRequest;
-import us.sep.biz.log.service.LogService;
+import us.sep.biz.common.request.LogRequest;
+import us.sep.biz.common.service.LogService;
 import us.sep.biz.user.request.EmailRequest;
 import us.sep.biz.user.request.UserRegisterRequest;
 import us.sep.biz.user.request.UserUpdateRequest;
 import us.sep.biz.user.service.UserService;
 import us.sep.common.MailSendUtils;
 import us.sep.biz.user.validator.EmailPatternValidator;
-import us.sep.common.RedisUtil;
+import us.sep.biz.common.util.RedisUtil;
 import us.sep.common.annotion.AvoidRepeatableCommit;
 import us.sep.common.annotion.LoggerName;
 import us.sep.common.ipUtil;
@@ -205,6 +205,17 @@ public class UserController {
         return new Result<>(true, CommonResultCode.SUCCESS.getCode(), CommonResultCode.SUCCESS.getMessage(),number);
     }
 
+    @GetMapping("/userEmail")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_MANAGER','ROLE_ADMIN')")
+    @Log(loggerName = LoggerName.WEB_DIGEST)
+    public Result<UserBO> getUserNameByEmail(String email , HttpServletRequest request) {
+        AssertUtil.assertStringNotBlank(email,"邮箱不能为空");
+        if (emailPatternValidator.isValid(email)) {
+            UserBO userBo = userService.getUserByEmail(email);
+            return new Result<>(true, CommonResultCode.SUCCESS.getCode(), CommonResultCode.SUCCESS.getMessage(), userBo);
+        }
+        return new Result<>(true, CommonResultCode.ILLEGAL_PARAMETERS.getCode(), "邮箱格式错误" );
+    }
 
     @GetMapping("/role")
     @PreAuthorize("hasAnyRole('ROLE_MANAGER','ROLE_ADMIN')")
@@ -257,9 +268,17 @@ public class UserController {
     }
 
     @GetMapping("/check")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_MANAGER')")
     @Log(loggerName = LoggerName.WEB_DIGEST)
-    public Result<Boolean> ifManagerOrAdmin(@RequestParam("username") String username ,HttpServletRequest request){
-        return new Result<> (true, CommonResultCode.SUCCESS.getCode(), CommonResultCode.SUCCESS.getMessage(),userService.ifManagerOrAdmin(username));
+    public Result<Boolean> ifManager(@RequestParam("username") String username ,HttpServletRequest request){
+        return new Result<> (true, CommonResultCode.SUCCESS.getCode(), CommonResultCode.SUCCESS.getMessage(),userService.ifManager(username));
+    }
+
+    @GetMapping("/check/admin")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_MANAGER')")
+    @Log(loggerName = LoggerName.WEB_DIGEST)
+    public Result<Boolean> ifAdmin(@RequestParam("username") String username ,HttpServletRequest request){
+        return new Result<> (true, CommonResultCode.SUCCESS.getCode(), CommonResultCode.SUCCESS.getMessage(),userService.ifAdmin(username));
     }
 
 
